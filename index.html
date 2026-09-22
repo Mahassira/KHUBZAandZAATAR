@@ -122,9 +122,11 @@
   .add-row{ display:flex; justify-content:flex-end; }
   .add-btn{ border:1.5px solid var(--ink); background:transparent; color:var(--ink); border-radius:999px; padding:9px 20px; font-weight:800; font-size:0.85rem; transition:background .2s ease,color .2s ease; }
   .add-btn.added{ background:var(--ink); color:#fff; }
-  .add-row.weighted{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
-  .add-row.weighted .add-btn{ flex:none; }
-  .weight-select{ flex:1; max-width:150px; border:1.5px solid var(--border); border-radius:999px; padding:8px 12px; font-size:0.82rem; color:var(--text); background:#fff; }
+  .add-row.weighted{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .add-row.weighted .card-qty{ font-size:0.82rem; font-weight:700; color:var(--muted); }
+  .add-row.weighted .stepper{ display:flex; align-items:center; gap:10px; }
+  .add-row.weighted .stepper button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--ink); background:transparent; color:var(--ink); font-weight:800; font-size:1rem; }
+  .add-row.weighted .stepper .qty{ min-width:60px; text-align:center; font-weight:800; font-size:0.85rem; color:var(--ink); }
 
   /* ================= IDENTITY ================= */
   .identity{ background:var(--ink); text-align:center; }
@@ -176,17 +178,15 @@
   .sticky-contact svg{ width:24px; height:24px; fill:#fff; }
   @media (max-width:900px){ .sticky-contact{ display:flex; } }
 
-  /* ================= CART DRAWER ================= */
-  .overlay{ position:fixed; inset:0; background:rgba(10,72,59,0.45); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:200; }
-  .overlay.open{ opacity:1; pointer-events:auto; }
-  .drawer{ position:fixed; top:0; bottom:0; inset-inline-end:0; width:min(440px,92vw); background:#fff; z-index:201; transform:translateX(105%); transition:transform .35s ease; display:flex; flex-direction:column; }
-  html[dir="rtl"] .drawer{ transform:translateX(-105%); }
-  .drawer.open{ transform:translateX(0); }
-  .drawer-head{ padding:22px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex:none; }
-  .drawer-head h3{ font-size:1.25rem; }
-  .drawer-close{ border:none; background:none; font-size:1.4rem; color:var(--ink); }
-  .drawer-body{ flex:1; overflow-y:auto; padding:22px 24px; }
-  .drawer-foot{ padding:18px 24px calc(18px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--border); flex:none; }
+  /* ================= ORDER SECTION ================= */
+  .order-section{ background:var(--sage-soft); }
+  .order-head{ text-align:center; max-width:640px; margin:0 auto 44px; }
+  .order-head h2{ font-size:clamp(2rem,4vw,2.8rem); }
+  .order-head p{ margin-top:14px; color:var(--muted); font-size:1.02rem; }
+  .order-panel{ background:#fff; border-radius:20px; padding:36px; max-width:820px; margin:0 auto; box-shadow:0 20px 50px rgba(10,72,59,0.08); }
+  .order-cols{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  @media (max-width:760px){ .order-cols{ grid-template-columns:1fr; } .order-panel{ padding:26px; } }
+  .order-cols .col-title{ font-size:0.85rem; font-weight:800; color:var(--terracotta); margin-bottom:16px; display:block; }
 
   .cart-line{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:13px 0; border-bottom:1px solid var(--border); }
   .cart-line .name{ font-weight:700; font-size:0.9rem; }
@@ -228,7 +228,7 @@
     </div>
     <div class="nav-right">
       <button class="lang-btn" id="langToggle" onclick="toggleLang()">EN</button>
-      <button class="nav-cta" onclick="openDrawer()">
+      <button class="nav-cta" onclick="goToOrder()">
         <span data-i18n="nav_cta">اطلب الآن</span>
         <span class="cart-count" id="cartCount">0</span>
       </button>
@@ -247,7 +247,7 @@
       <h1 data-i18n="hero_h1">خبزة دافية، ونكهة زعتر ما بتتنسى</h1>
       <p data-i18n="hero_p">منقوشات ومعجنات وحلويات فلسطينية تُحضّر طازجة يوم الطلب.</p>
       <div class="hero-ctas">
-        <button class="btn btn-solid" onclick="openDrawer()" data-i18n="hero_cta1">اطلب الآن</button>
+        <button class="btn btn-solid" onclick="goToOrder()" data-i18n="hero_cta1">اطلب الآن</button>
         <a class="btn btn-outline" href="#menu" data-i18n="hero_cta2">شاهد القائمة</a>
       </div>
     </div>
@@ -276,6 +276,19 @@
     </div>
     <div class="cat-nav" id="catNav"></div>
     <div id="menuPanels"></div>
+  </div>
+</section>
+
+<!-- ============ ORDER ============ -->
+<section class="order-section" id="order">
+  <div class="wrap">
+    <div class="order-head reveal">
+      <h2 data-i18n="drawer_title">اطلب الآن</h2>
+      <p data-i18n="order_head_p">راجع اختياراتك وعبّي بياناتك عشان نأكّد طلبك</p>
+    </div>
+    <div class="order-panel reveal">
+      <div id="orderBody"></div>
+    </div>
   </div>
 </section>
 
@@ -321,7 +334,7 @@
   <div class="wrap">
     <h2 data-i18n="final_h2">جاهز تطلب؟</h2>
     <p data-i18n="final_p">اختر أصنافك وخليها توصلك طازجة.</p>
-    <button class="btn btn-ink" onclick="openDrawer()" data-i18n="final_cta">ابدأ طلبك</button>
+    <button class="btn btn-ink" onclick="goToOrder()" data-i18n="final_cta">ابدأ طلبك</button>
   </div>
 </section>
 
@@ -353,16 +366,6 @@
 <a class="sticky-contact" id="cta-wa-sticky" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.45 1.32 4.95L2 22l5.25-1.37a9.9 9.9 0 0 0 4.79 1.22h.01c5.5 0 9.96-4.46 9.96-9.96C22 6.46 17.54 2 12.04 2zm5.8 14.24c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.37-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.11.32.02.51-.09.2-.14.32-.28.49-.14.17-.29.38-.42.51-.14.14-.29.29-.12.58.16.29.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.25 1.38.29.14.46.12.63-.07.17-.2.72-.84.92-1.13.19-.29.39-.24.65-.14.27.1 1.68.79 1.97.94.29.14.48.21.55.33.07.12.07.68-.17 1.36z"/></svg>
 </a>
-
-<!-- ============ CART DRAWER ============ -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-head">
-    <h3 data-i18n="drawer_title">اطلب الآن</h3>
-    <button class="drawer-close" onclick="closeDrawer()">×</button>
-  </div>
-  <div class="drawer-body" id="drawerBody"></div>
-</div>
 
 <script>
 /* ---------------- language ---------------- */
@@ -406,6 +409,9 @@ const I18N = {
   footer_contact:{ar:"تواصل",en:"Contact"},
   footer_bottom:{ar:"© خبزة وزعتر — كل الحقوق محفوظة",en:"© Khubza & Za'atar — All rights reserved"},
   drawer_title:{ar:"اطلب الآن",en:"Order Now"},
+  order_head_p:{ar:"راجع اختياراتك وعبّي بياناتك عشان نأكّد طلبك",en:"Review your picks and fill in your details so we can confirm your order"},
+  col_items:{ar:"أصنافك",en:"Your Items"},
+  col_details:{ar:"بياناتك",en:"Your Details"},
   empty_cart:{ar:"لسه ما اخترت أصناف.<br>روح على القائمة وضيف اللي يعجبك.",en:"You haven't picked any items yet.<br>Go to the menu and add what you like."},
   browse_menu:{ar:"تصفّح القائمة",en:"Browse Menu"},
   total_approx:{ar:"الإجمالي التقريبي",en:"Estimated Total"},
@@ -447,7 +453,7 @@ function toggleLang(){
   applyI18n();
   renderCategoryNav();
   renderMenu();
-  if(drawer.classList.contains('open')) renderDrawer();
+  renderOrderSection();
 }
 
 /* ---------------- assets ---------------- */
@@ -471,12 +477,7 @@ const io = new IntersectionObserver((entries)=>{
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 /* ---------------- MENU DATA ---------------- */
-const WEIGHT_OPTIONS = [
-  { value:0.25, ar:"ربع كيلو", en:"Quarter Kilo" },
-  { value:0.5, ar:"نص كيلو", en:"Half Kilo" },
-  { value:0.75, ar:"كيلو إلا ربع", en:"Three-Quarter Kilo" },
-  { value:1, ar:"كيلو", en:"One Kilo" },
-];
+const WEIGHT_STEP = 0.5;
 const UNIT_LABELS = { "قطعة":{ar:"قطعة",en:"piece"}, "حبة":{ar:"حبة",en:"piece"}, "كيلو":{ar:"كيلو",en:"kg"}, "وقية":{ar:"وقية",en:"ounce"} };
 
 const MENU = {
@@ -545,12 +546,17 @@ function renderMenu(){
     const flag = currentLang==='ar' ? item.flagAr : item.flagEn;
     const card = document.createElement('div');
     card.className = 'prod-card reveal in';
+    const currentQty = cart[item.id] || 0;
+    const kgWord = currentLang==='ar' ? 'كجم' : 'kg';
+    const notAdded = currentLang==='ar' ? 'لم يُضف بعد' : 'Not added yet';
     const addRow = isWeighted
       ? `<div class="add-row weighted">
-           <select class="weight-select" id="wsel-${item.id}">
-             ${WEIGHT_OPTIONS.map(o=>`<option value="${o.value}">${o[currentLang]}</option>`).join('')}
-           </select>
-           <button class="add-btn" data-id="${item.id}" data-weighted="1">${I18N.add_to_order[currentLang]}</button>
+           <span class="card-qty" id="cardqty-${item.id}">${currentQty>0 ? currentQty+' '+kgWord : notAdded}</span>
+           <div class="stepper">
+             <button onclick="stepCardQty('${item.id}', ${-WEIGHT_STEP})">−</button>
+             <span class="qty" id="cardqtynum-${item.id}">${currentQty}</span>
+             <button onclick="stepCardQty('${item.id}', ${WEIGHT_STEP})">+</button>
+           </div>
          </div>`
       : `<div class="add-row"><button class="add-btn" data-id="${item.id}">${I18N.add_to_order[currentLang]}</button></div>`;
     card.innerHTML = `
@@ -567,46 +573,52 @@ function renderMenu(){
   wrap.appendChild(grid);
   wrap.querySelectorAll('.add-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      if(btn.dataset.weighted){
-        const sel = document.getElementById('wsel-'+btn.dataset.id);
-        quickAddWeight(btn.dataset.id, parseFloat(sel.value));
-      } else {
-        quickAdd(btn.dataset.id);
-      }
+      quickAdd(btn.dataset.id);
       btn.classList.add('added');
     });
   });
 }
 
-function quickAdd(id){ cart[id] = +((cart[id]||0) + 1).toFixed(2); updateCartCount(); }
-function quickAddWeight(id, weight){ cart[id] = +((cart[id]||0) + weight).toFixed(2); updateCartCount(); }
+function quickAdd(id){ cart[id] = +((cart[id]||0) + 1).toFixed(2); updateCartCount(); renderOrderSection(); }
+
+function stepCardQty(id, delta){
+  let q = +((cart[id]||0) + delta).toFixed(2);
+  if(q < 0) q = 0;
+  cart[id] = q;
+  const kgWord = currentLang==='ar' ? 'كجم' : 'kg';
+  const notAdded = currentLang==='ar' ? 'لم يُضف بعد' : 'Not added yet';
+  const labelEl = document.getElementById('cardqty-'+id);
+  const numEl = document.getElementById('cardqtynum-'+id);
+  if(labelEl) labelEl.textContent = q>0 ? q+' '+kgWord : notAdded;
+  if(numEl) numEl.textContent = q;
+  updateCartCount();
+  renderOrderSection();
+}
 function updateCartCount(){
   const count = Object.values(cart).filter(q=>q>0).length;
   const el = document.getElementById('cartCount');
   if(count>0){ el.style.display='flex'; el.textContent = count; } else { el.style.display='none'; }
 }
 
-/* ---------------- drawer ---------------- */
-const overlay = document.getElementById('overlay');
-const drawer = document.getElementById('drawer');
+/* ---------------- order section ---------------- */
 let orderState = { method:'pickup' };
 
-function openDrawer(){ overlay.classList.add('open'); drawer.classList.add('open'); document.body.style.overflow='hidden'; renderDrawer(); }
-function closeDrawer(){ overlay.classList.remove('open'); drawer.classList.remove('open'); document.body.style.overflow=''; }
+function goToOrder(){
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+}
 
-function renderDrawer(){
-  const body = document.getElementById('drawerBody');
+function renderOrderSection(){
+  const body = document.getElementById('orderBody');
   const selected = ALL_ITEMS.filter(i => (cart[i.id]||0) > 0);
 
   if(selected.length === 0){
-    body.innerHTML = `<div class="empty-cart">${I18N.empty_cart[currentLang]}<br><button class="btn btn-ink" onclick="closeDrawer(); document.getElementById('menu').scrollIntoView({behavior:'smooth'});" style="margin-top:14px;">${I18N.browse_menu[currentLang]}</button></div>`;
-    drawer.querySelectorAll('.drawer-foot').forEach(f=>f.remove());
+    body.innerHTML = `<div class="empty-cart">${I18N.empty_cart[currentLang]}<br><button class="btn btn-ink" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'});" style="margin-top:14px;">${I18N.browse_menu[currentLang]}</button></div>`;
     return;
   }
 
   const linesHtml = selected.map(item=>{
     const isWeighted = item.unit === 'كيلو';
-    const step = isWeighted ? 0.25 : 1;
+    const step = isWeighted ? WEIGHT_STEP : 1;
     const qtyLabel = isWeighted ? `${cart[item.id]} ${currentLang==='ar'?'كجم':'kg'}` : cart[item.id];
     return `<div class="cart-line">
       <div class="name">${item[currentLang]}<small>${item.price} ${currentLang==='ar'?'ج.م':'EGP'} / ${UNIT_LABELS[item.unit][currentLang]}</small></div>
@@ -621,35 +633,37 @@ function renderDrawer(){
   const total = selected.reduce((sum,i)=> sum + i.price*cart[i.id], 0);
 
   body.innerHTML = `
-    ${linesHtml}
-    <div class="total-row"><div>${I18N.total_approx[currentLang]}</div><div class="amount">${total.toFixed(0)} ${currentLang==='ar'?'ج.م':'EGP'}</div></div>
-    <div class="total-note">${I18N.total_note[currentLang]}</div>
-
-    <div class="field"><label>${I18N.label_name[currentLang]}</label><input type="text" id="f-name" placeholder="${I18N.ph_name[currentLang]}"></div>
-    <div class="field"><label>${I18N.label_phone[currentLang]}</label><input type="tel" id="f-phone" placeholder="01xxxxxxxxx"></div>
-    <div class="field"><label>${I18N.label_method[currentLang]}</label>
-      <div class="radio-row">
-        <div class="radio-chip ${orderState.method==='pickup'?'selected':''}" data-method="pickup">${I18N.method_pickup[currentLang]}</div>
-        <div class="radio-chip ${orderState.method==='delivery'?'selected':''}" data-method="delivery">${I18N.method_delivery[currentLang]}</div>
+    <div class="order-cols">
+      <div>
+        <span class="col-title">${I18N.col_items[currentLang]}</span>
+        ${linesHtml}
+        <div class="total-row"><div>${I18N.total_approx[currentLang]}</div><div class="amount">${total.toFixed(0)} ${currentLang==='ar'?'ج.م':'EGP'}</div></div>
+        <div class="total-note">${I18N.total_note[currentLang]}</div>
+      </div>
+      <div>
+        <span class="col-title">${I18N.col_details[currentLang]}</span>
+        <div class="field"><label>${I18N.label_name[currentLang]}</label><input type="text" id="f-name" placeholder="${I18N.ph_name[currentLang]}"></div>
+        <div class="field"><label>${I18N.label_phone[currentLang]}</label><input type="tel" id="f-phone" placeholder="01xxxxxxxxx"></div>
+        <div class="field"><label>${I18N.label_method[currentLang]}</label>
+          <div class="radio-row">
+            <div class="radio-chip ${orderState.method==='pickup'?'selected':''}" data-method="pickup">${I18N.method_pickup[currentLang]}</div>
+            <div class="radio-chip ${orderState.method==='delivery'?'selected':''}" data-method="delivery">${I18N.method_delivery[currentLang]}</div>
+          </div>
+        </div>
+        <div class="field" id="addressField" style="display:${orderState.method==='delivery'?'block':'none'};">
+          <label>${I18N.label_address[currentLang]}</label><textarea id="f-address" placeholder="${I18N.ph_address[currentLang]}"></textarea>
+        </div>
+        <div class="field"><label>${I18N.label_date[currentLang]}</label><input type="date" id="f-date"></div>
+        <div class="field"><label>${I18N.label_time[currentLang]}</label><input type="time" id="f-time"></div>
+        <div class="field"><label>${I18N.label_notes[currentLang]}</label><textarea id="f-notes" placeholder="${I18N.ph_notes[currentLang]}"></textarea></div>
+        <div id="orderMsg"></div>
+        <button class="btn btn-ink" style="width:100%;justify-content:center;margin-top:18px;" id="submitOrderBtn">${I18N.submit_order[currentLang]}</button>
       </div>
     </div>
-    <div class="field" id="addressField" style="display:${orderState.method==='delivery'?'block':'none'};">
-      <label>${I18N.label_address[currentLang]}</label><textarea id="f-address" placeholder="${I18N.ph_address[currentLang]}"></textarea>
-    </div>
-    <div class="field"><label>${I18N.label_date[currentLang]}</label><input type="date" id="f-date"></div>
-    <div class="field"><label>${I18N.label_time[currentLang]}</label><input type="time" id="f-time"></div>
-    <div class="field"><label>${I18N.label_notes[currentLang]}</label><textarea id="f-notes" placeholder="${I18N.ph_notes[currentLang]}"></textarea></div>
-    <div id="orderMsg"></div>
   `;
 
-  drawer.querySelectorAll('.drawer-foot').forEach(f=>f.remove());
-  const footEl = document.createElement('div');
-  footEl.className = 'drawer-foot';
-  footEl.innerHTML = `<button class="btn btn-ink" style="width:100%;justify-content:center;" id="submitOrderBtn">${I18N.submit_order[currentLang]}</button>`;
-  drawer.appendChild(footEl);
-
   body.querySelectorAll('.radio-chip').forEach(chip=>{
-    chip.addEventListener('click', ()=>{ orderState.method = chip.dataset.method; renderDrawer(); });
+    chip.addEventListener('click', ()=>{ orderState.method = chip.dataset.method; renderOrderSection(); });
   });
   document.getElementById('submitOrderBtn').addEventListener('click', submitOrder);
 }
@@ -659,7 +673,7 @@ function changeQty(id, delta){
   if(q < 0) q = 0;
   cart[id] = q;
   updateCartCount();
-  renderDrawer();
+  renderOrderSection();
 }
 
 async function submitOrder(){
@@ -696,8 +710,7 @@ async function submitOrder(){
 }
 
 function showSuccess(orderId){
-  const body = document.getElementById('drawerBody');
-  drawer.querySelectorAll('.drawer-foot').forEach(f=>f.remove());
+  const body = document.getElementById('orderBody');
   const shortCode = orderId.slice(-6);
   body.innerHTML = `
     <div class="success-view">
@@ -712,6 +725,7 @@ function showSuccess(orderId){
 
 renderCategoryNav();
 renderMenu();
+renderOrderSection();
 </script>
 </body>
 </html>
