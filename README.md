@@ -3,7 +3,6 @@
 ## الملفات
 ```
 index.html                 ← الصفحة
-assets/khubza/             ← صور قسم «كيف نصنعها»
 assets/video/              ← فيديو الواجهة (موبايل/كمبيوتر)
 assets/img/                ← صور الواجهة، اللوجو (SVG)، صور المعرض، الأيقونات
 apps-script/Code.gs        ← استقبال الطلبات في Google Sheet

@@ -115,16 +115,6 @@ html[lang="en"] .hero .eyebrow{font-family:'Open Sans',sans-serif;font-style:ita
 .hero .trust{margin-top:18px;font-size:.85rem;color:rgba(255,255,255,.8);animation:rise .6s .24s ease both}
 @media(min-width:900px){.hero-inner{padding-bottom:64px}}
 
-/* ---------- how we make it ---------- */
-.making{background:#fff}
-.making-grid{margin-top:30px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.mk{margin:0}
-.mk img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;background:var(--sage-soft)}
-.mk figcaption{margin-top:10px;display:flex;gap:10px;align-items:baseline}
-.mk .n{font-weight:800;color:var(--gold-text);font-size:.9rem}
-.mk strong{font-size:1.02rem;color:var(--green)}
-@media(min-width:900px){.making-grid{grid-template-columns:repeat(4,1fr);gap:22px}}
-
 /* ---------- layered sections: each one slides over the previous ---------- */
 main{position:relative}
 .sheet{position:relative;z-index:1;background:#fff;border-radius:28px 28px 0 0;margin-top:-28px;box-shadow:0 -14px 34px rgba(4,31,25,.12)}
@@ -387,20 +377,6 @@ html[dir="ltr"] .back svg{transform:scaleX(-1)}
   </div>
 </section>
 
-<!-- MAKING: how is it made? -->
-<section class="sheet making" id="making">
-  <div class="wrap">
-    <span class="kicker" data-t="mk_kicker"></span>
-    <h2 class="h2" data-t="mk_h2"></h2>
-    <div class="making-grid">
-      <figure class="mk reveal"><img src="assets/khubza/step-1.webp" alt="" data-alt="mk1" width="440" height="550" loading="lazy" decoding="async"><figcaption><span class="n">01</span><strong data-t="mk1"></strong></figcaption></figure>
-      <figure class="mk reveal"><img src="assets/khubza/step-2.webp" alt="" data-alt="mk2" width="440" height="550" loading="lazy" decoding="async"><figcaption><span class="n">02</span><strong data-t="mk2"></strong></figcaption></figure>
-      <figure class="mk reveal"><img src="assets/khubza/step-3.webp" alt="" data-alt="mk3" width="440" height="550" loading="lazy" decoding="async"><figcaption><span class="n">03</span><strong data-t="mk3"></strong></figcaption></figure>
-      <figure class="mk reveal"><img src="assets/khubza/step-4.webp" alt="" data-alt="mk4" width="440" height="550" loading="lazy" decoding="async"><figcaption><span class="n">04</span><strong data-t="mk4"></strong></figcaption></figure>
-    </div>
-  </div>
-</section>
-
 <!-- MENU: what can I order? -->
 <section class="sheet menu" id="menu">
   <div class="wrap">
@@ -522,10 +498,6 @@ const T = {
   hero_eyebrow:["بأيدي غزية","Made by hands from Gaza"],
   hero_title:["من الفرن… لقلبك","From the oven… to your heart"],
   alt_hero:["منقوشة ذهبية تنضج داخل الفرن","A golden manousheh baking in the oven"],
-  mk_kicker:["كيف نصنعها","How we make it"], mk_h2:["من العجين إلى الفرن","From dough to oven"],
-  mk1:["نحضّر العجين","We prepare the dough"], mk2:["نضيف الحشوة","We add the filling"], mk3:["نشكّلها يدويًا","We shape it by hand"], mk4:["نخبزها","We bake it"],
-  alt_mk1:["تقطيع العجين يدويًا","Cutting the dough by hand"], alt_mk2:["إضافة حشوة الزعتر إلى العجين","Adding za'atar filling to the dough"],
-  alt_mk3:["لفّ المعجنات يدويًا على الصينية","Rolling the pastries by hand on the tray"], alt_mk4:["صينية المعجنات داخل الفرن","A tray of pastries in the oven"],
   swipe:["اسحب لمشاهدة المزيد","Swipe to see more"],
   hero_h1:["طعم البيت الفلسطيني… طازج في القاهرة","The taste of a Palestinian home… fresh in Cairo"],
   hero_sub:["مناقيش، معجنات ومخبوزات فلسطينية بوصفات أصيلة، نحضّرها بعناية ونقدّمها كما نحب أن نتذوقها في البيت.","Manakish, pastries and Palestinian baked goods made from authentic recipes — prepared with care, just the way we love them at home."],
