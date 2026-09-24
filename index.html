@@ -101,6 +101,8 @@ body.in-hero .nav::before{content:"";position:absolute;inset:0 0 -40px;backgroun
 .hero{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;background:#3a200c;color:#fff;padding:0}
 .hero picture,.hero-img{position:absolute;inset:0;width:100%;height:100%}
 .hero-img{object-fit:cover;object-position:50% 50%;animation:heroZoom 9s ease-out both}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s ease}
+.hero-video.on{opacity:1}
 @keyframes heroZoom{from{transform:scale(1.07)}to{transform:scale(1)}}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,rgba(20,10,4,.45) 0%,rgba(20,10,4,0) 22%,rgba(20,10,4,0) 38%,rgba(20,10,4,.55) 66%,rgba(20,10,4,.86) 100%)}
@@ -337,6 +339,7 @@ html[dir="ltr"] .back svg{transform:scaleX(-1)}
     <source media="(max-aspect-ratio: 1/1)" srcset="assets/img/hero-mobile-720.webp 720w, assets/img/hero-mobile-1080.webp 1080w" sizes="100vw">
     <img class="hero-img" src="assets/img/hero-desktop-1920.webp" srcset="assets/img/hero-desktop-1280.webp 1280w, assets/img/hero-desktop-1920.webp 1920w" sizes="100vw" width="1920" height="1080" fetchpriority="high" decoding="async" alt="" data-alt="hero">
   </picture>
+  <video id="heroVideo" class="hero-video" muted autoplay loop playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video>
   <div class="hero-inner">
     <p class="eyebrow" data-t="hero_eyebrow"></p>
     <h1 id="heroTitle" data-t="hero_title"></h1>
@@ -816,6 +819,41 @@ function observeCats(){
 const rio = new IntersectionObserver(es => es.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); rio.unobserve(en.target); } }), { threshold:.12 });
 document.querySelectorAll('.sheet .h2, .sheet .kicker, .sheet .lead').forEach(el => el.classList.add('reveal'));
 document.querySelectorAll('.reveal').forEach(el => rio.observe(el));
+
+/* ---------- hero video: portrait file on portrait screens, landscape file on wide screens ----------
+   The image stays underneath as the instant first paint and as the fallback. */
+const HERO_VIDEOS = { mobile:"assets/video/hero-mobile.mp4", desktop:"assets/video/hero-desktop.mp4" };
+(function(){
+  const hero = document.getElementById('hero'), v = document.getElementById('heroVideo');
+  const saveData = navigator.connection && navigator.connection.saveData;
+  if(reduceMotion || saveData){ v.remove(); return; }
+  v.muted = true; v.defaultMuted = true;
+  const mq = matchMedia('(max-aspect-ratio: 1/1)'), cache = {};
+  function toPlayable(src){
+    if(!src.startsWith('data:')) return src;
+    if(cache[src]) return cache[src];
+    try{
+      const bin = atob(src.slice(src.indexOf(',') + 1)), bytes = new Uint8Array(bin.length);
+      for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return cache[src] = URL.createObjectURL(new Blob([bytes], { type:'video/mp4' }));
+    }catch(e){ return src; }
+  }
+  let current = '', visible = true;
+  function play(){ const p = v.play(); if(p && p.catch) p.catch(() => {}); }
+  function pick(){
+    const want = mq.matches ? HERO_VIDEOS.mobile : HERO_VIDEOS.desktop;
+    if(!want || want === current) return;
+    current = want; v.classList.remove('on');
+    v.src = toPlayable(want); v.load(); if(visible) play();
+  }
+  v.addEventListener('playing', () => v.classList.add('on'));
+  v.addEventListener('error', () => v.classList.remove('on'));
+  if(mq.addEventListener) mq.addEventListener('change', pick); else if(mq.addListener) mq.addListener(pick);
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; visible ? play() : v.pause(); }).observe(hero);
+  // iOS Low Power Mode can refuse autoplay; retry on the first touch
+  addEventListener('touchstart', () => { if(v.paused && visible) play(); }, { passive:true, once:true });
+  pick();
+})();
 
 /* ---------- page state: transparent nav over the hero image, bottom CTA after it ---------- */
 (function(){
