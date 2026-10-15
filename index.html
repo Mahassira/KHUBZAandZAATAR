@@ -941,12 +941,6 @@ function orderText(o){
 
 async function saveOrder(order){
   const id = "KZ" + Date.now().toString().slice(-6);
-  if(ORDER_BACKEND === "claude"){
-    const db = await claude.use('db');
-    if(!db) throw new Error('db');
-    await db.collection('orders').doc(id).set({ ...order, id });
-    return id;
-  }
   if(!SHEETS_URL) throw new Error('no-endpoint');
   const payload = { ...order, id,
     itemsText: order.items.map(x => `${x.name} × ${x.qty} (${x.unit})`).join(" | "),
